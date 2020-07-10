@@ -1,7 +1,11 @@
 package days.model;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import javax.annotation.Generated;
 import javax.persistence.*;
+import java.sql.Timestamp;
 
 @Entity
 @Table
@@ -13,6 +17,14 @@ public class Picture {
     private String author;
     private String feedback;
     private Long likes;
+
+    @CreationTimestamp
+    private Timestamp created_at;
+
+    @UpdateTimestamp
+    private Timestamp updated_at;
+
+
 
     public Picture() {
     }

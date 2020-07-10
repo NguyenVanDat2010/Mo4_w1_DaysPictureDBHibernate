@@ -32,10 +32,11 @@ public class DaysPictureController {
         return "redirect:/pictures";
     }
 
-    @PostMapping("/like/{id}")
-    public ModelAndView likePicture(@PathVariable Long id){
-        ModelAndView modelAndView = new ModelAndView("redirect:/pictures");
+    @GetMapping("/like/{id}")
+    public String likePicture(@PathVariable Long id){
+//        ModelAndView modelAndView = new ModelAndView("redirect:/pictures");
+
         pictureService.updateLike(id);
-        return modelAndView;
+        return "redirect:/pictures";
     }
 }

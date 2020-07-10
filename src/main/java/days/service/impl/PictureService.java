@@ -8,34 +8,35 @@ import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.List;
 
-public class PictureService implements IPictureService{
+public class PictureService implements IPictureService {
     private static SessionFactory sessionFactory;
-    private  static EntityManager entityManager;
+    private static EntityManager entityManager;
 
     static {
         try {
             sessionFactory = new Configuration().configure("hibernate.conf.xml").buildSessionFactory();
             entityManager = sessionFactory.createEntityManager();
-        }catch (HibernateException e){
+        } catch (HibernateException e) {
             e.getStackTrace();
         }
     }
 
     @Override
     public List<Picture> findAll() {
-        String queryStr ="SELECT p FROM Picture AS p";
-        TypedQuery<Picture> query = entityManager.createQuery(queryStr,Picture.class);
+        String queryStr = "SELECT p FROM Picture AS p";
+        TypedQuery<Picture> query = entityManager.createQuery(queryStr, Picture.class);
         return query.getResultList();
     }
 
     @Override
     public Picture findOne(Long id) {
         String queryStr = "SELECT p FROM Picture AS p WHERE p.id = :id";
-        TypedQuery<Picture> query = entityManager.createQuery(queryStr,Picture.class);
-        query.setParameter("id",id);
+        TypedQuery<Picture> query = entityManager.createQuery(queryStr, Picture.class);
+        query.setParameter("id", id);
         return query.getSingleResult();
     }
 
@@ -43,7 +44,7 @@ public class PictureService implements IPictureService{
     public Picture save(Picture model) {
         Session session = null;
         Transaction transaction = null;
-        try{
+        try {
             session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
@@ -56,7 +57,7 @@ public class PictureService implements IPictureService{
             session.save(origin);
             transaction.commit();
             return origin;
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             if (transaction != null) {
                 transaction.rollback();
@@ -73,7 +74,7 @@ public class PictureService implements IPictureService{
     public Picture update(Picture picture) {
         Session session = null;
         Transaction transaction = null;
-        try{
+        try {
             session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
@@ -83,10 +84,10 @@ public class PictureService implements IPictureService{
             origin.setAuthor(picture.getAuthor());
             origin.setFeedback(picture.getFeedback());
             origin.setLikes(picture.getLikes());
-            session.save(origin);
+            session.saveOrUpdate(origin);
             transaction.commit();
             return origin;
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             if (transaction != null) {
                 transaction.rollback();
@@ -140,10 +141,59 @@ public class PictureService implements IPictureService{
     }
 
     @Override
-    public Picture updateLike(Long id) {
-        String queryStr = "UPDATE Picture SET Picture.likes=(likes+1) WHERE Picture .id = :id";
-        TypedQuery<Picture> query = entityManager.createQuery(queryStr,Picture.class);
-        query.setParameter("id",id);
-        return query.getSingleResult();
+    public void updateLike(Long id) {
+        Session session = null;
+        Transaction transaction = null;
+        try {
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
+
+            Picture origin = findOne(id);
+
+            origin.setLikes(origin.getLikes()+1);
+            session.saveOrUpdate(origin);
+            transaction.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (transaction != null) {
+                transaction.rollback();
+            }
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+
+
+
+//        System.out.println("-- tăng like lên 1 --");
+//        entityManager = sessionFactory.createEntityManager();
+//        entityManager.getTransaction().begin();
+//        String queryStr = "UPDATE Picture p SET p.likes = p.likes + :newlike "
+//                + " WHERE p.id = :id";
+//        Query query = entityManager.createQuery(queryStr);
+//
+////        TypedQuery<Picture> query = entityManager.createQuery("UPDATE Picture p SET p.likes = p.likes + :newlike "
+////                + " WHERE p.id = :id",Picture.class);
+//
+//        query.setParameter("newlike", 1);
+//        query.setParameter("id", id);
+//
+//        int rowsUpdated = query.executeUpdate();
+//        System.out.println("Like Updated: " + rowsUpdated);
+//        entityManager.getTransaction().commit();
+//        entityManager.close();
+
+//--------------------------------------------------------------------------------------
+
+//        String queryStr = "UPDATE Picture p SET p.likes=(p.likes+1) WHERE p.id = :id";
+//        TypedQuery<Picture> query = entityManager.createQuery(queryStr, Picture.class);
+//        query.setParameter("id", id);
+//        return query.getSingleResult();
+    }
+
+    public static void main(String[] args) {
+        PictureService pictureService = new PictureService();
+        pictureService.updateLike(8l);
     }
 }
