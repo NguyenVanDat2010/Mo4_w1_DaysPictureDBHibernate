@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Day's picture</title>
+</head>
+<body>
+<img id="img-of-the-day">
+
+<div th:if="${success}">
+    <br>
+    <span style="color:blue;" th:text="${success}"></span>
+</div>
+
+<form action="#" th:action="@{/pictures/save}" th:object="${picture}" method="post" novalidate="novalidate">
+    <input type="hidden" th:field="*{id}"/>
+    <div>
+        <label>Score:<span style="color: red">*</span></label><br>
+        <select th:field="*{score}" >
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+    </div>
+    <br>
+    <div>
+        <label>Author:<span style="color: red">*</span></label><br>
+        <input type="text" th:field="*{author}">
+    </div>
+    <br>
+    <div>
+        <label>Feedback:<span style="color: red">*</span></label><br>
+        <textarea th:field="*{feedback}" style="width: 80%; height: 150px;"></textarea>
+    </div>
+    <div hidden="hidden">
+        <label>Like</label>
+        <input type="text" value="0" name="likes" id="likes">
+    </div>
+    <br>
+    <input type="submit" value="Comment">
+    <br><br>
+</form>
+
+<hr style="width: 80%;"align="left">
+<div th:each="row,rowStat:${comment}">
+    <span th:text="${'+ '+row.getScore()+' '+row.getFeedback()}"></span>
+    <br>
+    <div>
+        <span th:text="${row.getLikes()+' likes'}"></span>
+        <a style="text-decoration: none" th:href="@{/pictures/like/{id}(id=${row.getId()})}"><button>Like</button></a>
+    </div>
+    <hr style="width: 80%;"align="left">
+</div>
+
+<script>
+    let query = 'https://api.nasa.gov/planetary/apod?api_key=WBRd7fJAkNL64RdYB37jUb33i48rujadDq8AD7eU';
+    let request = new XMLHttpRequest();
+    request.open('GET', query);
+    request.onload = function() {
+        if (request.status === 200) {
+            let response = JSON.parse(request.responseText);
+            document.getElementById('img-of-the-day').setAttribute('src', response.url);
+        }
+    };
+    request.send();
+</script>
+</body>
+</html>
